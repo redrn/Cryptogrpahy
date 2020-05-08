@@ -2,20 +2,25 @@
 //
 
 #include <iostream>
+#include <fstream>
 #include <openssl/aes.h>
-#include<stdio.h>
+#include <openssl/evp.h>
+#include <stdio.h>
+#include <string.h>
 using namespace std;
 
 //#pragma comment(lib,"libssl.lib")
 //#pragma comment(lib,"libcrypto.lib")
 
+
+
 // key must be longer tha 16 byte, create a file "en_output.txt"
-int my_aes_encrypt(const unsigned char* key, const char* filename)
+int my_aes_encrypt(const unsigned char* key, string filename)
 {
 	string file_content("");
 	FILE* in_file, * out_file;
 
-	if (fopen_s(&in_file, filename, "rb") != 0)
+	if (!(in_file = fopen(filename.c_str(), "rb")))
 	{
 		printf("Fail to open file!\n");
 		return -1;
@@ -44,7 +49,12 @@ int my_aes_encrypt(const unsigned char* key, const char* filename)
 
 	// copy string to char*
 	char* en_char = (char*)malloc(sizeof(char) * (file_content.size() + 1));
-	strcpy_s(en_char, file_content.size() + 1, file_content.c_str());
+	strcpy(en_char, file_content.c_str());
+
+	// // encode en_char to base64
+	// unsigned char *b64_en_char = (unsigned char*)malloc(sizeof(char) * (file_content.size() + 1) / 6 + 1);
+	// memset(b64_en_char, 0, )
+	// 	EVP_EncodeBlock(b64_en_char, (unsigned char *)en_char, (file_content.size() + 1));
 
 	// convert key
 	AES_KEY aes_key;
@@ -65,7 +75,7 @@ int my_aes_encrypt(const unsigned char* key, const char* filename)
 	AES_cbc_encrypt((unsigned char*)en_char, ouput, file_content.size(), &aes_key, iv, AES_ENCRYPT);
 
 	// output
-	if (fopen_s(&out_file, "en_output.txt", "wb") != 0)
+	if (!(out_file = fopen((filename+="_en").c_str(), "wb")))
 	{
 		printf("Fail to open file!\n");
 		return -1;
@@ -84,12 +94,12 @@ int my_aes_encrypt(const unsigned char* key, const char* filename)
 }
 
 // key must be longer tha 16 byte, create a file "de_output.txt"
-int my_aes_decrypt(const unsigned char* key, const char* filename)
+int my_aes_decrypt(const unsigned char* key, string filename)
 {
 	string file_content("");
 	FILE* in_file, * out_file;
 
-	if (fopen_s(&in_file, filename, "rb") != 0)
+	if (!(in_file = fopen(filename.c_str(), "rb")))
 	{
 		printf("Fail to open file!\n");
 		return -1;
@@ -105,7 +115,7 @@ int my_aes_decrypt(const unsigned char* key, const char* filename)
 
 	// copy string to char*
 	char* de_char = (char*)malloc(sizeof(char) * (file_content.size() + 1));
-	strcpy_s(de_char, file_content.size() + 1, file_content.c_str());
+	strcpy(de_char, file_content.c_str());
 
 	// convert key
 	AES_KEY aes_key;
@@ -126,7 +136,7 @@ int my_aes_decrypt(const unsigned char* key, const char* filename)
 	AES_cbc_encrypt((unsigned char*)de_char, ouput, file_content.size(), &aes_key, iv, AES_DECRYPT);
 
 	// output
-	if (fopen_s(&out_file, "de_output.txt", "wb") != 0)
+	if (!(out_file = fopen((filename+="_de").c_str(), "wb")))
 	{
 		printf("Fail to open file!\n");
 		return -1;
@@ -138,14 +148,19 @@ int my_aes_decrypt(const unsigned char* key, const char* filename)
 	return 0;
 }
 
+
 int main()
 {
-	char filename[100];
-	std::cout << "input file name:";
-	std::cin >> filename;
-	// encrypt
+	//TODO: Randomly generated key
+
+	std::string filename;
+	filename = "/home/redrn/Documents/program/Cryptogrpahy/DecentralizedStorageNetwork/test/test_graph";
+	// std::cout << "input file name:";
+	// std::cin >> filename;
+
+	// Encrypt
 	unsigned char key[33] = "8rrh1086omGe8qF0jgvxM53tASc46YHa";
-	int err = my_aes_encrypt((unsigned char*)key, filename);
+	int err = my_aes_encrypt((unsigned char*)key, filename.c_str());
 	if (err == 0)
 	{
 		std::cout << "\n"<< "success" << endl;
@@ -155,17 +170,17 @@ int main()
 		std::cout << "fail" << endl;
 	}
 
-	// decrypt
-	//unsigned char key[33] = "8rrh1086omGe8qF0jgvxM53tASc46YHa";
-	//int err = my_aes_decrypt(key, "en_output.txt");
-	//if (err == 0)
-	//{
-	//	std::cout << "\n"<< "success" << endl;
-	//}
-	//else
-	//{
-	//	std::cout << "fail" << endl;
-	//}
+	// Decrypt
+	// unsigned char key[33] = "8rrh1086omGe8qF0jgvxM53tASc46YHa";
+	err = my_aes_decrypt(key, filename+="_en");
+	if (err == 0)
+	{
+		std::cout << "\n"<< "success" << endl;
+	}
+	else
+	{
+		std::cout << "fail" << endl;
+	}
 }
 
 // 运行程序: Ctrl + F5 或调试 >“开始执行(不调试)”菜单

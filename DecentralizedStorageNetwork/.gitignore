@@ -3,3 +3,4 @@ ppt/*
 build/*
 bin/*
 .vscode/*
+test/*

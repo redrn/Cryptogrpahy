@@ -1,9 +1,9 @@
 #include <iostream>
-#include <fstream>
-#include <vector>
 #include <string>
 #include <string.h>
+#define LIBSSH_STATIC 1
 #include <libssh/libssh.h>
+#include <stdlib.h>
 using namespace std;
 
 /** SECTION: Temporary windows implementation for GNU/Unix functions: */
@@ -230,7 +230,7 @@ int authenticate_pubkey(ssh_session session, const char *pk_file, const char *sk
     rc = ssh_pki_import_pubkey_file(pk_file, &pub_key);
     if(rc!=SSH_OK)
     {
-        cout << "1" << endl;
+        cerr << "Error importing public key." << endl;
         ssh_key_free(pub_key);
         return rc;
     }
@@ -238,7 +238,7 @@ int authenticate_pubkey(ssh_session session, const char *pk_file, const char *sk
     rc = ssh_userauth_try_publickey(session, NULL, pub_key);
     if(rc!=SSH_AUTH_SUCCESS)
     {
-        cout << "2" << endl;
+        cerr << "Error offering public key." << endl;
         ssh_key_free(pub_key);
         return rc;
     }
@@ -246,7 +246,7 @@ int authenticate_pubkey(ssh_session session, const char *pk_file, const char *sk
     rc = ssh_pki_import_privkey_file(sk_file, NULL, NULL, NULL, &priv_key);
     if (rc != SSH_OK)
     {
-        cout << "3" << endl;
+        cerr << "Error importing private key." << endl;
         ssh_key_free(pub_key);
         ssh_key_free(priv_key);
         return rc;
@@ -255,7 +255,7 @@ int authenticate_pubkey(ssh_session session, const char *pk_file, const char *sk
     rc = ssh_userauth_publickey(session, NULL, priv_key);
     if (rc != SSH_AUTH_SUCCESS)
     {
-        cout << "4" << endl;
+        cerr << "Error authenticating with private and public keys." << endl;
         ssh_key_free(pub_key);
         ssh_key_free(priv_key);
         return rc;
@@ -276,10 +276,10 @@ int authenticate_pubkey(ssh_session session, const char *pk_file, const char *sk
 int main()
 {
     // SECTION: Establish connection
-    const char *username = "RedRN";
+    const char *username = "neon";
     const char *host = "192.168.0.163";
-    const char *priv_key = "~/.ssh/id_rsa";
-    const char *pub_key = "~/.ssh/id_rsa.pub";
+    const char *priv_key = "/home/redrn/.ssh/id_rsa";
+    const char *pub_key = "/home/redrn/.ssh/id_rsa.pub";
 
     int status; //temp variable for storing status of operation
 
@@ -298,9 +298,7 @@ int main()
 
     if(status != SSH_OK)
     {
-        cerr << "Initial connection failed:\n"
-             << ssh_get_error(main_session) << endl;
-        cerr << "rc: " << status << endl;
+        cerr << "Initial connection failed: " << ssh_get_error(main_session) << endl;
         ssh_free(main_session);
         return -1;
     }

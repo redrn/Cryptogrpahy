@@ -1,3 +1,4 @@
 # c++ file
 *.o
 *.exe
+*.stackdump

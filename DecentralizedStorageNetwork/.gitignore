@@ -1,0 +1,5 @@
+ppt/*
+*.exe
+build/*
+bin/*
+.vscode/*
